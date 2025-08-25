@@ -1,0 +1,88 @@
+DROP TABLE IF EXISTS Hospital_DATA;
+
+CREATE TABLE Hospital_Data (
+    Hospital_Name   VARCHAR(100) PRIMARY KEY,
+    Location        VARCHAR(50),
+    Department      VARCHAR(50),
+    Doctors_Count   INT,
+    Patients_Count  INT,
+    Admission_Date  DATE,
+    Discharge_Date  DATE,
+    Medical_Expenses DECIMAL(12,2)
+);
+
+SELECT * FROM Hospital_DATA;
+
+--1) Total Number of Patients
+SELECT SUM(Patients_Count) AS total_patients
+FROM Hospital_Data;
+
+--2) Average Number of Doctors per Hospital
+SELECT 
+    Hospital_Name,
+    AVG(Doctors_Count) AS avg_doctors
+FROM Hospital_Data
+GROUP BY Hospital_Name
+ORDER BY Hospital_Name;
+
+--3) Top 3 Departments with the Highest Number of Patients
+SELECT Department,
+       SUM(Patients_Count) AS total_patients
+FROM Hospital_Data
+GROUP BY Department
+ORDER BY total_patients DESC
+LIMIT 3;
+
+--4) Hospital with the Maximum Medical Expenses (total)
+SELECT Hospital_Name,
+       SUM(Medical_Expenses) AS total_medical_expenses
+FROM Hospital_Data
+GROUP BY Hospital_Name
+ORDER BY total_medical_expenses DESC
+LIMIT 1;
+
+--5) Daily Average Medical Expenses
+SELECT hospital_name,
+       AVG(medical_expenses) AS avg_daily_expenses
+FROM hospital_data
+GROUP BY hospital_name;
+
+--6) Longest Hospital Stay
+SELECT patient_id,
+       (discharge_date - admission_date) AS stay_length
+FROM hospital_data
+ORDER BY stay_length DESC
+LIMIT 1;
+
+--7) Total Patients Treated Per City
+SELECT Location AS City,
+       SUM(Patients_Count) AS total_patients
+FROM Hospital_Data
+GROUP BY Location
+ORDER BY total_patients DESC;
+
+--8) Average Length of Stay Per Department
+SELECT department,
+       SUM(doctors_count)::decimal / NULLIF(SUM(patients_count), 0) AS doctor_patient_ratio
+FROM hospital_data
+GROUP BY department;
+
+SELECT Department,
+       ROUND(SUM(doctors_count)::numeric / NULLIF(SUM(patients_count), 0), 3) AS doctor_patient_ratio
+FROM hospital_data
+GROUP BY Department;
+
+--9) Department with the Lowest Number of Patients
+SELECT Department,
+       SUM(Patients_Count) AS total_patients
+FROM Hospital_Data
+GROUP BY Department
+ORDER BY total_patients ASC
+LIMIT 1;
+
+--10) Monthly Medical Expenses Report
+SELECT EXTRACT(MONTH FROM admission_date) AS month,
+       SUM(medical_expenses) AS total_expenses
+FROM hospital_data
+GROUP BY EXTRACT(MONTH FROM admission_date)
+ORDER BY month;
